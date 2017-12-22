@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.terabits.mapper.TestMapper">
+
+	<!--左侧是PO对象，右侧是数据库中的对象，有两种方式实现多个参数的注入：PO和map  --> 
+	<resultMap id="testMap" type="com.terabits.meta.po.TestPO">
+		<result property="gid" column="gid" javaType="java.lang.Integer"></result>
+		<result property="name" column="name" javaType="java.lang.String"></result>
+        <result property="password" column="password" javaType="java.lang.String"></result>
+        <result property="sex" column="sex" javaType="java.lang.String"></result>
+	</resultMap>
+    <!-- 在各种标签中的id属性必须和接口中的方法名相同 ， id属性值必须是唯一的，不能够重复使用。parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型-->
+    <!-- useGeneratedKeys：（ 仅 对 insert 有 用 ） 这 会 告 诉 MyBatis 使 用 JDBC 的getGeneratedKeys
+                方法来取出由数据（比如：像 MySQL 和 SQLServer 这样的数据库管理系统的自动递增字段）内部生成的主键。默认值： false。 -->
+    <!--keyProperty： （仅对 insert有用）标记一个属性， MyBatis 会通过 getGeneratedKeys或者通过 insert 语句的 selectKey 子元素设置它的值。默认：不设置。 -->
+    <!--#{}中的内容，为占位符，当参数为某个JavaBean时，表示放置该Bean对象的属性值  -->
+    
+   <!--  <where>自动去除开头的and
+    <set> 自动去除末尾的,
+    <trim><trim prefix="" suffix="" suffixOverrides="" prefixOverrides=""></trim>
+  	  加上前缀，加上后缀，自动去除后缀中字符，自动去除前缀中字符
+   --> 
+	<sql id="dataBase">
+    	name,password,sex,age
+    </sql>
+    
+    <sql id="parameter">
+    	#{name},#{password},#{sex},#{age}
+    </sql>
+    
+	<insert id="insertTestPO2"  parameterType="java.util.Map" keyProperty="id">
+		insert into ${tableName}
+			<trim prefix="(" suffix=")">
+				<include refid="dataBase"></include>
+			</trim>
+		values
+			<trim prefix="(" suffix=")">
+				<include refid="parameter"></include>
+			</trim>
+	</insert>
+	
+	<!-- 返回类型位Map可以取代resultMap   open="(" close=")" separator=","-->
+	<sql id="testPOO">
+		name as "Name",
+		password as "Password",
+		sex as "Sex",
+		age as "Age"
+	</sql>
+	
+	<select id="select" parameterType="java.util.Map" resultType="java.util.Map">
+		select 
+			<include refid="dataBase"></include>
+		from ${tableName}
+		<where>
+			 ${column}=#{value}
+		</where> 
+	</select>
+	
+	<select id="selectByList" resultType="java.util.Map">
+		select
+			<trim suffixOverrides=",">
+				<include refid="dataBase"></include>
+			</trim>
+		from t_charge_test
+		where
+			name in
+			<foreach collection="list" item="name" index="index" open="(" close=")" separator=",">  
+           		#{name}  
+        	</foreach>  
+	</select>
+	
+	<select id="selectByMap" resultType="java.util.Map">
+		select
+			<trim suffixOverrides=",">
+				<include refid="dataBase"></include>
+			</trim>
+		from ${tableName}
+		where
+			name in
+			<foreach collection="date" item="name" index="index" open="(" close=")" separator=",">  
+           		#{name}  
+        	</foreach>  
+	</select>
+</mapper> 
